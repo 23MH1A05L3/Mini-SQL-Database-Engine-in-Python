@@ -273,11 +273,23 @@ The following are intentionally **not supported**:
 ## Example Queries
 
 ``` sql
-SELECT * FROM employees;
-SELECT name, age, country FROM employees;
-SELECT * FROM employees WHERE age > 30;
-SELECT COUNT(*) FROM employees;
-SELECT COUNT(salary) FROM employees WHERE is_full_time = 'True';
+    -- Select all columns
+    SELECT * FROM employees;
+
+    -- Select specific columns
+    SELECT name, age, country FROM employees;
+
+    -- Filter by numeric condition
+    SELECT * FROM employees WHERE age > 30;
+
+    -- Filter by string condition
+    SELECT name, department FROM employees WHERE country = 'India';
+
+    -- Count all rows
+    SELECT COUNT(*) FROM employees;
+
+    -- Count non-null salaries for a subset
+    SELECT COUNT(salary) FROM employees WHERE is_full_time = 'True';
 ```
 
 ------------------------------------------------------------------------
@@ -285,10 +297,17 @@ SELECT COUNT(salary) FROM employees WHERE is_full_time = 'True';
 ## Example Error Queries
 
 ``` sql
-SELECT name, age WHERE age > 30;
-SELECT foo FROM employees;
-SELECT * FROM employees WHERE foo = 'X';
-SELECT * FROM employees WHERE age >> 30;
+    -- Syntax error: missing FROM
+    SELECT name, age WHERE age > 30;
+
+    -- Non-existent column in SELECT
+    SELECT foo FROM employees;
+
+    -- Non-existent column in WHERE
+    SELECT * FROM employees WHERE foo = 'X';
+
+    -- Unsupported operator
+    SELECT * FROM employees WHERE age >> 30;
 ```
 
 ------------------------------------------------------------------------
@@ -297,9 +316,13 @@ SELECT * FROM employees WHERE age >> 30;
 
 The engine is designed to **fail fast and clearly**:
 
--   Invalid syntax → descriptive error message
--   Missing table or column → explicit error
--   Internal issues → generic error (no Python traceback)
-
+-   Invalid syntax (missing FROM, bad SELECT list, empty WHERE, unsupported operator)
+    → “Invalid ...” / “Missing ...” style messages.
+-   Non‑existent table or column
+    → “Unknown table: <name>” or “Selected column not found: <name>”.
+-   Unexpected internal issues
+    → generic error message instead of a Python traceback.
+    
 This keeps the CLI stable and user-friendly while enforcing a strict SQL
 subset.
+
